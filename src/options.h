@@ -259,7 +259,7 @@ struct options_main {
 /* Single mode wordlist per username (--single-user-seed) */
 	char *seed_per_user;
 
-/* Override config's SingleRetestGuess */
+/* --[no]single-retest-guess tri-state option (vs. config SingleRetestGuess) */
 	char *single_retest_guess;
 
 /* Override (deprecated) NoLoaderDupeCheck config option */
