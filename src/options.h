@@ -134,8 +134,6 @@
 /* Markov mode enabled */
 #define FLG_MKV_CHK			0x0000000200000000ULL
 #define FLG_MKV_SET			(FLG_MKV_CHK | FLG_CRACKING_SET)
-/* Emit a status line for every password cracked */
-#define FLG_CRKSTAT			0x0000000400000000ULL
 /* Wordlist dupe suppression */
 #define FLG_DUPESUPP			0x0000000800000000ULL
 /* Force scalar mode */
@@ -157,6 +155,7 @@
 
 /*
  * These are available for using!
+ *		0x0000000400000000ULL
  *		0x0000100000000000ULL
  *		0x0000200000000000ULL
  */
@@ -445,6 +444,8 @@ struct options_main {
 	int keep_guessing;
 /* --log-stderr */
 	int log_stderr;
+/* Emit a status line for every password cracked */
+	int crack_status;
 };
 
 extern struct options_main options;
