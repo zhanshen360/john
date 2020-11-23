@@ -30,6 +30,10 @@ static char *opt_errors[] = {
 static char *completed, *completed_param;
 static int completed_negated;
 
+/* Magics for tri-states with optional params */
+char *opt_tri_negated = "* prefixed with no- *";
+char *opt_tri_noparam = "* no param given *";
+
 static char *opt_find(struct opt_entry *list, char *opt, struct opt_entry **entry)
 {
 	char *name, *param;
@@ -133,9 +137,14 @@ static int opt_process_one(struct opt_entry *list, opt_flags *flg, char *opt)
 	*flg |= entry->flg_set;
 
 	if (entry->format) {
+		if (param && completed_negated) {
+			return OPT_ERROR_PARAM_EXT;
+		} else
 		if (!param) {
 			if (entry->req_clr & OPT_REQ_PARAM)
 				return OPT_ERROR_PARAM_REQ;
+			if ((entry->req_clr & OPT_TRISTATE))
+				*(char **)entry->param = completed_negated ? OPT_TRISTATE_NEGATED : OPT_TRISTATE_NO_PARAM;
 		} else
 		if (opt_process_param(param, entry->format, entry->param))
 			return OPT_ERROR_PARAM_INV;
@@ -170,35 +179,6 @@ void opt_process(struct opt_entry *list, opt_flags *flg, char **argv)
 	if ((entry = list))
 	while (entry->name)
 		entry++->seen = 0;
-
-#ifdef DEBUG
-	/* Sanity checks for code bugs, as opposed to option syntax */
-	if ((entry = list))
-	do {
-		if (!entry->name)
-			break;
-		if (entry->flg_set & FLG_MULTI) {
-			if (!entry->format || entry->format[0] != OPT_FMT_ADD_LIST_MULTI[0]) {
-				if (john_main_process)
-					fprintf(stderr, "Bug: FLG_MULTI given without using OPT_FMT_ADD_LIST_MULTI for \"--%s\"\n",
-					        entry->name);
-				error();
-			}
-		}
-		if (entry->format) {
-			if (entry->req_clr & OPT_TRISTATE) {
-				if (john_main_process)
-					fprintf(stderr, "Bug: OPT_TRISTATE given without format being NULL for \"--%s\"\n", entry->name);
-				error();
-			}
-			else if (entry->req_clr & OPT_BOOL) {
-				if (john_main_process)
-					fprintf(stderr, "Bug: OPT_BOOL given without format being NULL for \"--%s\"\n", entry->name);
-				error();
-			}
-		}
-	} while (entry++);
-#endif
 
 	if (*(opt = argv))
 	while (*++opt)
@@ -242,10 +222,12 @@ void opt_check(struct opt_entry *list, opt_flags flg, char **argv)
 	/* Set all bools and tri-states. The latters are set to -1 if not given */
 	if ((entry = list))
 	while (entry->name) {
-		if ((entry->req_clr & OPT_TRISTATE) && !entry->seen)
-			*(int*)entry->param = -1;
-		else if (entry->req_clr & (OPT_BOOL | OPT_TRISTATE))
-			*(int*)entry->param = entry->boolean;
+		if (!entry->format && entry->param) {
+			if ((entry->req_clr & OPT_TRISTATE) && !entry->seen)
+				*(int*)entry->param = -1;
+			else if (entry->req_clr & (OPT_BOOL | OPT_TRISTATE))
+				*(int*)entry->param = entry->boolean;
+		}
 		entry++;
 	}
 }

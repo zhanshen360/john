@@ -68,6 +68,9 @@ struct opt_entry {
 	int seen;
 };
 
+extern char *opt_tri_negated;
+extern char *opt_tri_noparam;
+
 /*
  * Special flags for req_clr.
  */
@@ -75,6 +78,12 @@ struct opt_entry {
 #define OPT_TRISTATE			0x40000000
 #define OPT_REQ_PARAM			0x80000000
 #define OPT_ALL_FLAGS			~(OPT_BOOL | OPT_TRISTATE | OPT_REQ_PARAM)
+
+/*
+ * Tri-state with optional argument
+ */
+#define OPT_TRISTATE_NEGATED		opt_tri_negated
+#define OPT_TRISTATE_NO_PARAM		opt_tri_noparam
 
 /*
  * Additional parameter formats.
