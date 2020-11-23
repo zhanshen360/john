@@ -168,7 +168,7 @@ static struct opt_entry opt_list[] = {
 	{"nolog", FLG_NOLOG, FLG_NOLOG}, // Deprecated!
 	{"no-log", FLG_NOLOG, FLG_NOLOG},
 	{"no-mask", FLG_NO_MASK_BENCH, FLG_NO_MASK_BENCH, FLG_TEST_CHK, FLG_MASK_CHK},
-	{"log-stderr", FLG_LOG_STDERR, FLG_LOG_STDERR},
+	{"log-stderr", FLG_ONCE, 0, 0, OPT_BOOL, NULL, &options.log_stderr},
 	{"crack-status", FLG_CRKSTAT, FLG_CRKSTAT},
 	{"mkpc", FLG_ONCE, 0, FLG_CRACKING_CHK, OPT_REQ_PARAM, "%d", &options.force_maxkeys},
 	{"min-length", FLG_ONCE, 0, FLG_CRACKING_CHK, OPT_REQ_PARAM, "%u", &options.req_minlength},
@@ -192,7 +192,7 @@ static struct opt_entry opt_list[] = {
 #endif
 	{"skip-self-tests", FLG_NOTESTS, FLG_NOTESTS},
 	{"costs", FLG_ONCE, 0, 0, OPT_REQ_PARAM, OPT_FMT_STR_ALLOC, &costs_str},
-	{"keep-guessing", FLG_ONCE, 0, 0, OPT_THREESTATE, NULL, &options.keep_guessing},
+	{"keep-guessing", FLG_ONCE, 0, 0, OPT_TRISTATE, NULL, &options.keep_guessing},
 	{"stress-test", FLG_LOOPTEST | FLG_TEST_SET, FLG_TEST_CHK,
 		0, ~FLG_TEST_SET & ~FLG_FORMAT & ~FLG_SAVEMEM & ~FLG_DYNFMT & ~FLG_MASK_CHK & OPT_ALL_FLAGS,
 		"%d", &benchmark_time},
@@ -338,8 +338,7 @@ JOHN_USAGE_REGEX \
 "--bare-always-valid=Y      treat bare hashes as valid (Y/N)\n" \
 "--progress-every=N         emit a status line every N seconds\n" \
 "--crack-status             emit a status line whenever a password is cracked\n" \
-"--keep-guessing            try finding plaintext collisions\n" \
-"--no-keep-guessing         turn off any default \"keep guessing\" for used format\n" \
+"--[no-]keep-guessing       try finding plaintext collisions\n" \
 "--max-candidates=[-]N      gracefully exit after this many candidates tried.\n" \
 "                           (if negative, reset count on each crack)\n" \
 "--max-run-time=[-]N        gracefully exit after this many seconds (if negative,\n" \

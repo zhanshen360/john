@@ -57,8 +57,9 @@ struct opt_entry {
 /* Pointer to buffer where the parameter is to be stored */
 	void *param;
 
-/* The value of a threestate --foo or --no-foo option (if seen) */
-	int threestate_bool;
+/* The value of a bool or tri-state option.  While a bool will be 0 if option
+ * not used, a tri-state will be -1 */
+	int boolean;
 
 /* Used to detect dupe options without a specific option flag, simply counting
  * that it's not used twice. This is used only when flg_set is 0 (we do use
@@ -70,9 +71,10 @@ struct opt_entry {
 /*
  * Special flags for req_clr.
  */
-#define OPT_THREESTATE			0x40000000
+#define OPT_BOOL			0x20000000
+#define OPT_TRISTATE			0x40000000
 #define OPT_REQ_PARAM			0x80000000
-#define OPT_ALL_FLAGS			~(OPT_THREESTATE | OPT_REQ_PARAM)
+#define OPT_ALL_FLAGS			~(OPT_BOOL | OPT_TRISTATE | OPT_REQ_PARAM)
 
 /*
  * Additional parameter formats.

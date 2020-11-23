@@ -26,11 +26,7 @@ static char *opt_errors[] = {
 	"Invalid options combination or duplicate option"
 };
 
-/*
- * These are used for argument expansion to the session file.
- * Note that three-state option --foobar given abbreviated as --no-fo will
- * have `completed` as "foobar" and `completed_negated` set to true.
- */
+/* These are used for argument expansion to the session file. */
 static char *completed, *completed_param;
 static int completed_negated;
 
@@ -52,6 +48,7 @@ static char *opt_find(struct opt_entry *list, char *opt, struct opt_entry **entr
 			param = strchr(name, ':');
 		if (param) {
 			char *c = strchr(name, ':');
+			/* Arg may contain '=' if delimiter is ':' */
 			if (c && param > c)
 				param = c;
 			length = param - name;
@@ -69,6 +66,11 @@ static char *opt_find(struct opt_entry *list, char *opt, struct opt_entry **entr
 					if (length == strlen(list->name))
 						break;
 				} else {
+/*
+ * An abbreviated option is not considered ambiguous if first defined
+ * alternative is a prefix of all others.  Eg.  --si is parsed as --single
+ * even though we also have options --single-seed and --single-wordlist.
+ */
 					if (strncmp(found->name, list->name, strlen(found->name))) {
 						*entry = NULL;
 						return NULL;
@@ -78,7 +80,7 @@ static char *opt_find(struct opt_entry *list, char *opt, struct opt_entry **entr
 		} while ((++list)->name);
 
 		if ((*entry = found)) {
-			found->threestate_bool = !(completed_negated = negated);
+			found->boolean = !(completed_negated = negated);
 			completed = found->name;
 			completed_param = param;
 			return param;
@@ -169,6 +171,7 @@ void opt_process(struct opt_entry *list, opt_flags *flg, char **argv)
 	while (entry->name)
 		entry++->seen = 0;
 
+#ifdef DEBUG
 	/* Sanity checks for code bugs, as opposed to option syntax */
 	if ((entry = list))
 	do {
@@ -182,15 +185,20 @@ void opt_process(struct opt_entry *list, opt_flags *flg, char **argv)
 				error();
 			}
 		}
-		if (entry->req_clr & OPT_THREESTATE) {
-			if (entry->format) {
+		if (entry->format) {
+			if (entry->req_clr & OPT_TRISTATE) {
 				if (john_main_process)
-					fprintf(stderr, "Bug: OPT_THREESTATE given without format being NULL for \"--%s\"\n", entry->name);
+					fprintf(stderr, "Bug: OPT_TRISTATE given without format being NULL for \"--%s\"\n", entry->name);
+				error();
+			}
+			else if (entry->req_clr & OPT_BOOL) {
+				if (john_main_process)
+					fprintf(stderr, "Bug: OPT_BOOL given without format being NULL for \"--%s\"\n", entry->name);
 				error();
 			}
 		}
 	} while (entry++);
-
+#endif
 
 	if (*(opt = argv))
 	while (*++opt)
@@ -231,11 +239,13 @@ void opt_check(struct opt_entry *list, opt_flags flg, char **argv)
 		}
 	}
 
-	/* Set all three-states */
+	/* Set all bools and tri-states. The latters are set to -1 if not given */
 	if ((entry = list))
 	while (entry->name) {
-		if (entry->req_clr & OPT_THREESTATE)
-			*(int*)entry->param = entry->seen ? entry->threestate_bool : -1;
+		if ((entry->req_clr & OPT_TRISTATE) && !entry->seen)
+			*(int*)entry->param = -1;
+		else if (entry->req_clr & (OPT_BOOL | OPT_TRISTATE))
+			*(int*)entry->param = entry->boolean;
 		entry++;
 	}
 }

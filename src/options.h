@@ -39,6 +39,9 @@
 #define FLG_PWD_SUP			0x00000004
 /* An option requires password files */
 #define FLG_PWD_REQ			(0x00000008 | FLG_PWD_SUP)
+/*
+ * Available for use: 0x00000010
+ */
 /* A cracking mode enabled */
 #define FLG_CRACKING_CHK		0x00000020
 #define FLG_CRACKING_SUP		0x00000040
@@ -119,16 +122,15 @@
 /* pipe mode enabled, reading from stdin with rules support */
 #define FLG_PIPE_CHK			0x10000000
 #define FLG_PIPE_SET			(FLG_PIPE_CHK | FLG_WORDLIST_SET)
-/* Dynamic load of foreign format module */
-#define FLG_DYNFMT			0x20000000
 
 /*
- * Note that 0x40000000 is taken for OPT_THREESTATE, and
+ * Note that 0x20000000 is taken for OPT_BOOL,
+ *           0x40000000 is taken for OPT_TRISTATE, and
  *           0x80000000 is taken for OPT_REQ_PARAM, see getopt.h
  */
 
-/* Log to stderr */
-#define FLG_LOG_STDERR			0x0000000100000000ULL
+/* Dynamic load of foreign format module */
+#define FLG_DYNFMT			0x0000000100000000ULL
 /* Markov mode enabled */
 #define FLG_MKV_CHK			0x0000000200000000ULL
 #define FLG_MKV_SET			(FLG_MKV_CHK | FLG_CRACKING_SET)
@@ -154,7 +156,7 @@
 #define FLG_VERBOSITY			0x0000080000000000ULL
 
 /*
- * These are free for using!
+ * These are available for using!
  *		0x0000100000000000ULL
  *		0x0000200000000000ULL
  */
@@ -439,8 +441,10 @@ struct options_main {
 	int subset_min_diff;
 /* Subsets, max. diff */
 	int subset_max_diff;
-/* --[no-]keep-guessing option */
+/* --[no-]keep-guessing tri-state option (vs. format's FMT_NOT_EXACT) */
 	int keep_guessing;
+/* --log-stderr */
+	int log_stderr;
 };
 
 extern struct options_main options;
