@@ -63,6 +63,13 @@ static char *opt_find(struct opt_entry *list, char *opt, struct opt_entry **entr
 
 		found = NULL;
 		do {
+			/* Cludge for --no-foo options that aren't OPT_BOOL or OPT_TRISTATE */
+			if (negated && !strncmp("no-", list->name, 3) && !strncmp(name - 3, list->name, length + 3)) {
+				name -= 3;
+				length += 3;
+				negated = 0;
+			}
+
 			if (length <= strlen(list->name))
 			if (!strncmp(name, list->name, length)) {
 				if (!found) {
